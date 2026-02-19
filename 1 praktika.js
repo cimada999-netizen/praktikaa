@@ -7,7 +7,8 @@ import {
   StyleSheet,
   Dimensions,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  ScrollView
 } from 'react-native';
 
 export default function App() {
@@ -16,73 +17,70 @@ export default function App() {
   const [sum, setSum] = useState(null);
   const [orientation, setOrientation] = useState('portrait');
 
-  // Состояние ориентации
   useEffect(() => {
-    const handleOrientation = () => {
-      const { width, height } = Dimensions.get('window');
-      setOrientation(width > height ? 'landscape' : 'portrait');
-    };
-    
-    Dimensions.addEventListener('change', handleOrientation);
-    handleOrientation(); // initial
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+      setOrientation(window.width > window.height ? 'landscape' : 'portrait');
+    });
 
-    return () => {
-      Dimensions.removeEventListener('change', handleOrientation);
-    };
+    return () => subscription?.remove();
   }, []);
 
   const calculateSum = () => {
-    const result = parseFloat(num1) + parseFloat(num2);
+    const result = parseFloat(num1 || 0) + parseFloat(num2 || 0);
     setSum(result);
   };
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Text style={styles.title}>Екі санның қосындысы</Text>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Екі санның қосындысы</Text>
 
-      <View style={orientation === 'portrait' ? styles.inputContainer : styles.inputContainerLandscape}>
-        <TextInput
-          style={styles.input}
-          placeholder="Сан 1"
-          keyboardType="numeric"
-          value={num1}
-          onChangeText={setNum1}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Сан 2"
-          keyboardType="numeric"
-          value={num2}
-          onChangeText={setNum2}
-        />
-      </View>
+        <View style={
+          orientation === 'portrait' 
+          ? styles.inputContainer 
+          : styles.inputContainerLandscape
+        }>
+          <TextInput
+            style={styles.input}
+            placeholder="Сан 1"
+            keyboardType="numeric"
+            value={num1}
+            onChangeText={setNum1}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Сан 2"
+            keyboardType="numeric"
+            value={num2}
+            onChangeText={setNum2}
+          />
+        </View>
 
-      <Button title="Қосу" onPress={calculateSum} />
+        <Button title="Қосу" onPress={calculateSum} />
 
-      {sum !== null && (
-        <Text style={styles.result}>Қосынды: {sum}</Text>
-      )}
+        {sum !== null && (
+          <Text style={styles.result}>Қосынды: {sum}</Text>
+        )}
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff', // қарапайым ақ фон
+    flexGrow: 1,
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#000',
-    textAlign: 'center',
   },
   inputContainer: {
     width: '80%',
@@ -90,23 +88,20 @@ const styles = StyleSheet.create({
   },
   inputContainerLandscape: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     width: '80%',
     marginBottom: 15,
   },
   input: {
     backgroundColor: '#f0f0f0',
-    padding: 10,
-    marginBottom: 10,
+    padding: 12,
+    margin: 5,
     borderRadius: 8,
     fontSize: 18,
     flex: 1,
-    marginHorizontal: 5,
   },
   result: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     marginTop: 20,
-    color: '#000',
   },
 });
