@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, ScrollView, Linking, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  ScrollView,
+  Linking,
+  StyleSheet,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BOOK_TEXT = [
@@ -13,33 +21,40 @@ export default function App() {
   const [filtered, setFiltered] = useState(BOOK_TEXT);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Чекпойнт сақтау/жүктеу
+  // Жүктеу (checkpoint)
   useEffect(() => {
     (async () => {
       const savedIndex = await AsyncStorage.getItem("@checkpoint");
-      if (savedIndex !== null) setCurrentIndex(parseInt(savedIndex));
+      if (savedIndex !== null) {
+        setCurrentIndex(parseInt(savedIndex));
+      }
     })();
   }, []);
 
+  // Сақтау
   const saveCheckpoint = async (index) => {
     setCurrentIndex(index);
     await AsyncStorage.setItem("@checkpoint", index.toString());
   };
 
+  // Іздеу
   const searchBook = (text) => {
     setSearch(text);
-    const result = BOOK_TEXT.filter(b => 
-      b.title.toLowerCase().includes(text.toLowerCase()) ||
-      b.content.toLowerCase().includes(text.toLowerCase())
+    const result = BOOK_TEXT.filter(
+      (b) =>
+        b.title.toLowerCase().includes(text.toLowerCase()) ||
+        b.content.toLowerCase().includes(text.toLowerCase())
     );
     setFiltered(result);
+    setCurrentIndex(0);
   };
 
   return (
     <View style={styles.container}>
-      {/* Реклама (просто баннер) */}
+
+      {/* Реклама */}
       <View style={styles.adBanner}>
-        <Text style={{ textAlign: "center" }}>Реклама: Сізге қызықты өнім!</Text>
+        <Text>Реклама: Сізге қызықты өнім!</Text>
       </View>
 
       {/* Поиск */}
@@ -54,11 +69,17 @@ export default function App() {
       <ScrollView style={styles.bookContainer}>
         {filtered.length > 0 ? (
           <View>
-            <Text style={styles.title}>{filtered[currentIndex]?.title}</Text>
-            <Text style={styles.content}>{filtered[currentIndex]?.content}</Text>
+            <Text style={styles.title}>
+              {filtered[currentIndex]?.title}
+            </Text>
+            <Text style={styles.content}>
+              {filtered[currentIndex]?.content}
+            </Text>
           </View>
         ) : (
-          <Text>Нәтиже табылмады</Text>
+          <Text style={{ textAlign: "center" }}>
+            Нәтиже табылмады
+          </Text>
         )}
       </ScrollView>
 
@@ -81,16 +102,56 @@ export default function App() {
         title="Авторға хат жазу"
         onPress={() => Linking.openURL("mailto:author@example.com")}
       />
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10, marginTop: 30 },
-  adBanner: { height: 50, backgroundColor: "#ddd", justifyContent: "center", marginBottom: 10 },
-  searchInput: { borderWidth: 1, borderColor: "#ccc", borderRadius: 5, padding: 8, marginBottom: 10 },
-  bookContainer: { flex: 1, marginBottom: 10 },
-  title: { fontSize: 20, fontWeight: "bold", marginBottom: 10 },
-  content: { fontSize: 16, lineHeight: 24 },
-  navButtons: { flexDirection: "row", justifyContent: "space-between", marginBottom: 10 }
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  adBanner: {
+    width: "90%",
+    height: 50,
+    backgroundColor: "#ddd",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 15,
+    borderRadius: 10,
+  },
+  searchInput: {
+    width: "90%",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 15,
+  },
+  bookContainer: {
+    width: "90%",
+    maxHeight: 250,
+    marginBottom: 15,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  content: {
+    fontSize: 16,
+    lineHeight: 24,
+    textAlign: "center",
+  },
+  navButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "90%",
+    marginBottom: 15,
+  },
 });
